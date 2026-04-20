@@ -1,10 +1,90 @@
 import React from "react";
 
-const ACCEPTED_TYPES = [
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/msword",
-];
+const FLOATING_EMOJIS = ["🔥", "💀", "😅", "🔥", "💀", "😅", "🔥", "💀"];
+
+function FloatingEmoji({ emoji, delay, left }) {
+  return (
+    <span
+      className="absolute text-2xl sm:text-3xl pointer-events-none select-none opacity-0"
+      style={{
+        left: `${left}%`,
+        bottom: "-40px",
+        animation: `float-up ${8 + Math.random() * 6}s linear ${delay}s infinite`,
+      }}
+      aria-hidden="true"
+    >
+      {emoji}
+    </span>
+  );
+}
+
+function SocialProofCounter() {
+  const [count, setCount] = React.useState(2847);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCount((prev) => prev + Math.floor(Math.random() * 3));
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-3 px-5 py-3 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm">
+      <span className="text-lg">🔥</span>
+      <span className="text-white/80 text-sm font-medium">
+        <span className="text-white font-bold tabular-nums">{count.toLocaleString()}</span> CVs roasted this week
+      </span>
+    </div>
+  );
+}
+
+function CVMockup() {
+  return (
+    <div className="relative" style={{ perspective: "800px" }}>
+      {/* Shadow */}
+      <div
+        className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 w-48 h-6 bg-primary/20 rounded-full blur-xl"
+        style={{ animation: "cv-shadow 6s ease-in-out infinite" }}
+      />
+      {/* CV Card */}
+      <div className="animate-cv-float" style={{ transformStyle: "preserve-3d" }}>
+        <div className="w-56 sm:w-64 bg-gradient-to-br from-[#1a1a2e] to-[#16162a] rounded-2xl p-5 border border-white/[0.08] shadow-2xl shadow-primary/10">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-roast" />
+            <div className="flex-1">
+              <div className="h-2.5 w-20 bg-white/20 rounded-full" />
+              <div className="h-2 w-14 bg-white/10 rounded-full mt-1.5" />
+            </div>
+          </div>
+          {/* Content lines */}
+          <div className="space-y-2.5 mb-4">
+            <div className="h-2 w-full bg-white/10 rounded-full" />
+            <div className="h-2 w-4/5 bg-white/10 rounded-full" />
+            <div className="h-2 w-full bg-white/10 rounded-full" />
+            <div className="h-2 w-3/5 bg-white/10 rounded-full" />
+          </div>
+          {/* Roast overlay */}
+          <div className="bg-roast/10 border border-roast/20 rounded-lg p-2.5 mb-3">
+            <p className="text-[9px] text-roast/80 leading-relaxed font-medium">
+              "Detail-oriented" — yet you misspelled "experience" twice...
+            </p>
+          </div>
+          {/* Tips overlay */}
+          <div className="bg-tips/10 border border-tips/20 rounded-lg p-2.5">
+            <p className="text-[9px] text-tips/80 leading-relaxed font-medium">
+              ✓ Quantify achievements with real metrics
+            </p>
+          </div>
+          {/* Score badge */}
+          <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-gradient-to-br from-roast to-orange-500 flex items-center justify-center shadow-lg shadow-roast/30">
+            <span className="text-white text-xs font-bold">3/10</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Hero({ onFileSelect }) {
   const [isDragging, setIsDragging] = React.useState(false);
@@ -33,31 +113,86 @@ export default function Hero({ onFileSelect }) {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden px-4 sm:px-6 lg:px-8">
-      {/* Floating blobs */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-blob" />
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-primary/15 rounded-full blur-3xl animate-blob [animation-delay:2s]" />
-      <div className="absolute top-1/2 left-1/3 w-48 h-48 bg-primary/8 rounded-full blur-2xl animate-blob [animation-delay:4s]" />
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-hero-dark">
+      {/* Animated gradient mesh background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div
+          className="absolute w-[500px] h-[500px] rounded-full blur-[120px]"
+          style={{
+            background: "radial-gradient(circle, rgba(124,111,205,0.4) 0%, transparent 70%)",
+            top: "10%",
+            left: "15%",
+            animation: "gradient-mesh-1 12s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute w-[400px] h-[400px] rounded-full blur-[100px]"
+          style={{
+            background: "radial-gradient(circle, rgba(226,75,74,0.3) 0%, transparent 70%)",
+            top: "40%",
+            right: "10%",
+            animation: "gradient-mesh-2 15s ease-in-out infinite",
+          }}
+        />
+        <div
+          className="absolute w-[350px] h-[350px] rounded-full blur-[100px]"
+          style={{
+            background: "radial-gradient(circle, rgba(255,107,53,0.25) 0%, transparent 70%)",
+            bottom: "10%",
+            left: "40%",
+            animation: "gradient-mesh-3 10s ease-in-out infinite",
+          }}
+        />
+      </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 items-center py-20">
+      {/* Floating emojis */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {FLOATING_EMOJIS.map((emoji, i) => (
+          <FloatingEmoji
+            key={i}
+            emoji={emoji}
+            delay={i * 1.5}
+            left={10 + i * 11}
+          />
+        ))}
+      </div>
+
+      {/* Subtle grid overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 lg:gap-16 items-center px-4 sm:px-6 lg:px-8 py-28">
         {/* Left content */}
         <div className="animate-fade-in">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
-            <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
-              Roast
-            </span>{" "}
-            My CV
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] text-white/60 text-xs font-medium mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-tips animate-pulse" />
+            AI-Powered CV Roaster
+          </div>
+
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-[1.05] tracking-tight">
+            <span className="animate-ember">Roast</span>
+            <br />
+            <span className="text-white">My CV</span>
           </h1>
-          <p className="mt-6 text-lg sm:text-xl text-text-secondary max-w-lg leading-relaxed">
+
+          <p className="mt-6 text-lg sm:text-xl text-white/50 max-w-lg leading-relaxed">
             Upload your CV and let AI brutally roast it — then actually fix it.
+            No mercy. No filter. Just truth.
           </p>
 
-          {/* Upload area */}
+          {/* Upload dropzone */}
           <div
-            className={`mt-10 relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer p-8 text-center ${
+            className={`mt-10 relative rounded-2xl border-2 border-dashed transition-all duration-500 cursor-pointer p-6 sm:p-8 text-center backdrop-blur-sm ${
               isDragging
-                ? "border-primary bg-primary/10 scale-[1.02]"
-                : "border-primary/30 bg-card/60 hover:border-primary/60 hover:bg-card/80"
+                ? "border-roast bg-roast/10 scale-[1.02]"
+                : "border-white/[0.12] bg-white/[0.03] hover:bg-white/[0.06] animate-glow-border"
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -78,70 +213,43 @@ export default function Hero({ onFileSelect }) {
               onChange={handleFileChange}
             />
             <div className="flex flex-col items-center gap-3">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              <div className="w-14 h-14 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center">
+                <svg className="w-7 h-7 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                 </svg>
               </div>
-              <p className="font-semibold text-text">
-                {isDragging ? "Drop it like it's hot!" : "Drag & drop your CV here"}
+              <p className="font-medium text-white/80">
+                {isDragging ? "Drop it like it's hot! 🔥" : "Drag & drop your CV here"}
               </p>
-              <p className="text-sm text-text-secondary">or click to browse • PDF & DOCX</p>
+              <p className="text-sm text-white/30">PDF & DOCX supported</p>
             </div>
           </div>
 
+          {/* CTA Button */}
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="mt-6 px-8 py-4 bg-primary text-white font-semibold rounded-xl text-lg shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 animate-pulse-soft hover:animate-none hover:scale-105 active:scale-95"
+            className="mt-6 group relative px-8 py-4 rounded-xl text-white font-bold text-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(124,111,205,0.4)] active:scale-95"
           >
-            🔥 Upload & Get Roasted
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-roast to-orange-500 opacity-90 group-hover:opacity-100 transition-opacity" />
+            <span className="relative z-10 flex items-center gap-2">
+              🔥 Upload & Get Roasted
+            </span>
           </button>
-        </div>
 
-        {/* Right side — phone mockup */}
-        <div className="hidden lg:flex justify-center animate-slide-up [animation-delay:0.3s]">
-          <div className="relative w-72">
-            {/* Phone frame */}
-            <div className="bg-card rounded-[2.5rem] p-3 shadow-2xl shadow-primary/10 border border-primary/10">
-              <div className="bg-bg rounded-[2rem] overflow-hidden">
-                {/* Status bar */}
-                <div className="bg-primary/5 px-6 py-3 flex justify-between items-center text-xs text-text-secondary">
-                  <span>9:41</span>
-                  <div className="flex gap-1">
-                    <div className="w-4 h-2 bg-text-secondary/40 rounded-sm" />
-                    <div className="w-2 h-2 bg-text-secondary/40 rounded-full" />
-                  </div>
-                </div>
-                {/* App content preview */}
-                <div className="p-5 space-y-4">
-                  <div className="text-center">
-                    <p className="text-sm font-bold text-primary">🔥 Roast My CV</p>
-                  </div>
-                  <div className="bg-card rounded-xl p-3 shadow-sm">
-                    <p className="text-xs font-semibold text-roast mb-1">The Roast</p>
-                    <p className="text-[10px] text-text-secondary leading-relaxed">
-                      "Your CV says 'detail-oriented' but you misspelled 'experience'..."
-                    </p>
-                  </div>
-                  <div className="bg-card rounded-xl p-3 shadow-sm">
-                    <p className="text-xs font-semibold text-tips mb-1">Fix It</p>
-                    <p className="text-[10px] text-text-secondary leading-relaxed">
-                      1. Quantify your achievements with real numbers...
-                    </p>
-                  </div>
-                  <div className="flex justify-center">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-xs">▶️</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Glow effect */}
-            <div className="absolute -inset-4 bg-primary/5 rounded-[3rem] blur-2xl -z-10" />
+          {/* Social proof */}
+          <div className="mt-8 animate-slide-up [animation-delay:0.5s]">
+            <SocialProofCounter />
           </div>
         </div>
+
+        {/* Right side — 3D CV Mockup */}
+        <div className="hidden lg:flex justify-center animate-slide-up [animation-delay:0.3s]">
+          <CVMockup />
+        </div>
       </div>
+
+      {/* Bottom fade to page bg */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-bg to-transparent" />
     </section>
   );
 }

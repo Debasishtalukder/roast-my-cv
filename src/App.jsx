@@ -1,5 +1,6 @@
 import React from "react";
 import Hero from "./components/Hero.jsx";
+import StatsBar from "./components/StatsBar.jsx";
 import HowItWorks from "./components/HowItWorks.jsx";
 import FeaturesBento from "./components/FeaturesBento.jsx";
 import UploadSection from "./components/UploadSection.jsx";
@@ -18,9 +19,17 @@ export default function App() {
   const [error, setError] = React.useState(null);
   const [showCreditModal, setShowCreditModal] = React.useState(false);
 
+  const [scrolled, setScrolled] = React.useState(false);
+
   React.useEffect(() => {
     initUser();
     setCredits(getCredits());
+
+    function handleScroll() {
+      setScrolled(window.scrollY > 100);
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   async function handleFileSelect(file) {
@@ -95,17 +104,21 @@ export default function App() {
   return (
     <div className="min-h-screen bg-bg">
       {/* Header bar */}
-      <header className="fixed top-0 left-0 right-0 z-40 bg-bg/80 backdrop-blur-md border-b border-primary/10">
+      <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+        scrolled
+          ? "bg-bg/80 backdrop-blur-md border-b border-primary/10"
+          : "bg-transparent"
+      }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <a href="/" className="text-lg font-bold">
-            <span className="bg-gradient-to-r from-primary to-primary-light bg-clip-text text-transparent">
+            <span className="animate-ember">
               🔥 Roast
             </span>{" "}
-            My CV
+            <span className={scrolled ? "text-text" : "text-white"}>My CV</span>
           </a>
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-text-secondary">
-              <span className="text-primary font-bold">{credits}</span> roast{credits !== 1 ? "s" : ""} left
+            <span className={`text-sm font-medium ${scrolled ? "text-text-secondary" : "text-white/50"}`}>
+              <span className={`font-bold ${scrolled ? "text-primary" : "text-white"}`}>{credits}</span> roast{credits !== 1 ? "s" : ""} left
             </span>
             <a
               href="#upload"
@@ -120,6 +133,7 @@ export default function App() {
       {/* Main content */}
       <main>
         <Hero onFileSelect={handleFileSelect} />
+        <StatsBar />
         <HowItWorks />
         <FeaturesBento />
 
