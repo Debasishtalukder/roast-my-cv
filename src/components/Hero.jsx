@@ -1,255 +1,204 @@
 import React from "react";
+import { LiquidMetalButton } from "./ui/liquid-metal-button.jsx";
 
 const FLOATING_EMOJIS = ["🔥", "💀", "😅", "🔥", "💀", "😅", "🔥", "💀"];
 
 function FloatingEmoji({ emoji, delay, left }) {
   return (
-    <span
-      className="absolute text-2xl sm:text-3xl pointer-events-none select-none opacity-0"
-      style={{
-        left: `${left}%`,
-        bottom: "-40px",
-        animation: `float-up ${8 + Math.random() * 6}s linear ${delay}s infinite`,
-      }}
-      aria-hidden="true"
-    >
-      {emoji}
-    </span>
+    <span className="absolute text-2xl pointer-events-none select-none"
+      style={{ left: `${left}%`, bottom: "-40px", animation: `float-up ${8 + Math.random() * 6}s linear ${delay}s infinite` }}
+      aria-hidden="true">{emoji}</span>
   );
 }
 
 function SocialProofCounter() {
-  const [count, setCount] = React.useState(2847);
-
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setCount((prev) => prev + Math.floor(Math.random() * 3));
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
-
+  const [count, setCount] = React.useState(2880);
+  React.useEffect(() => { const i = setInterval(() => setCount((p) => p + Math.floor(Math.random() * 3)), 4000); return () => clearInterval(i); }, []);
   return (
-    <div className="flex items-center gap-3 px-5 py-3 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm">
+    <div className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-card border border-border shadow-sm">
       <span className="text-lg">🔥</span>
-      <span className="text-white/80 text-sm font-medium">
-        <span className="text-white font-bold tabular-nums">{count.toLocaleString()}</span> CVs roasted this week
+      <span className="text-text-body text-sm font-medium">
+        <span className="text-text font-bold tabular-nums">{count.toLocaleString()}</span> CVs roasted this week
       </span>
     </div>
   );
 }
 
-function CVMockup() {
+/* ── Card data ── */
+const cards = [
+  { name: "Alex T.", score: "4/10", bg: "#FFF3E8", gradient: "from-orange-400 to-pink-400", roast: '"Synergy expert" — that\'s not a real job title...', tip: "✓ Use specific, measurable role titles" },
+  { name: "Priya S.", score: "7/10", bg: "#F0FFF4", gradient: "from-emerald-400 to-teal-400", roast: '"Passionate learner" — everyone says that...', tip: "✓ Show learning through certifications" },
+  { name: "Mike R.", score: "2/10", bg: "#EEF2FF", gradient: "from-blue-400 to-indigo-400", roast: '"Proficient in Word" — it\'s 2026, come on...', tip: "✓ List modern, relevant technical skills" },
+  { name: "Sarah K.", score: "5/10", bg: "#FFF8E8", gradient: "from-amber-400 to-orange-400", roast: '"Hard worker" — that\'s a baseline, not a skill...', tip: "✓ Replace soft claims with hard results" },
+  { name: "John D.", score: "3/10", bg: "#FFFFFF", gradient: "from-purple-400 to-pink-400", roast: '"Detail-oriented" — yet you misspelled "experience" twice...', tip: "✓ Quantify achievements with real metrics" },
+];
+
+/* ── Pure CSS Card Stack ── */
+function CardStack() {
+  // Inject styles once
+  React.useEffect(() => {
+    const id = "card-stack-css";
+    if (document.getElementById(id)) return;
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = `
+      @keyframes heroFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-12px); }
+      }
+      @keyframes cardEntry {
+        from { opacity: 0; transform: translateY(60px) rotate(0deg) !important; }
+      }
+
+      .card-stack {
+        position: relative;
+        width: 340px;
+        height: 380px;
+        cursor: pointer;
+        animation: heroFloat 5s ease-in-out infinite;
+      }
+      .card-stack:hover {
+        animation-play-state: paused;
+      }
+
+      .cv-card {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 280px;
+        margin-left: -140px;
+        margin-top: -170px;
+        border-radius: 20px;
+        padding: 22px;
+        border: 1px solid rgba(255,255,255,0.8);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+        transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 0.5s ease,
+                    opacity 0.5s ease;
+        will-change: transform;
+      }
+
+      .cv-card-1 { z-index: 1; opacity: 0.7; transform: rotate(-12deg) translate(-40px, 30px); animation: cardEntry 0.7s cubic-bezier(0.34,1.56,0.64,1) 0s both; }
+      .cv-card-2 { z-index: 2; opacity: 0.75; transform: rotate(-6deg) translate(-20px, 15px); animation: cardEntry 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.1s both; }
+      .cv-card-3 { z-index: 3; opacity: 0.8; transform: rotate(-2deg) translate(-8px, 6px); animation: cardEntry 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.2s both; }
+      .cv-card-4 { z-index: 4; opacity: 0.85; transform: rotate(3deg) translate(8px, -4px); animation: cardEntry 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.3s both; }
+      .cv-card-5 { z-index: 5; opacity: 1; transform: rotate(0deg) translate(0, 0); animation: cardEntry 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.4s both; }
+
+      .card-stack:hover .cv-card-1 { transform: rotate(-18deg) translate(-110px, 25px) scale(0.93); opacity: 1; box-shadow: 0 16px 48px rgba(0,0,0,0.15); }
+      .card-stack:hover .cv-card-2 { transform: rotate(-9deg) translate(-60px, 12px) scale(0.95); opacity: 1; box-shadow: 0 16px 48px rgba(0,0,0,0.15); }
+      .card-stack:hover .cv-card-3 { transform: rotate(-2deg) translate(-15px, 2px) scale(0.97); opacity: 1; box-shadow: 0 16px 48px rgba(0,0,0,0.15); }
+      .card-stack:hover .cv-card-4 { transform: rotate(7deg) translate(35px, -8px) scale(0.97); opacity: 1; box-shadow: 0 16px 48px rgba(0,0,0,0.15); }
+      .card-stack:hover .cv-card-5 { transform: rotate(14deg) translate(80px, -15px) scale(0.95); opacity: 1; box-shadow: 0 16px 48px rgba(0,0,0,0.15); }
+    `;
+    document.head.appendChild(style);
+  }, []);
+
   return (
-    <div className="relative" style={{ perspective: "800px" }}>
-      {/* Shadow */}
-      <div
-        className="absolute bottom-[-20px] left-1/2 -translate-x-1/2 w-48 h-6 bg-primary/20 rounded-full blur-xl"
-        style={{ animation: "cv-shadow 6s ease-in-out infinite" }}
-      />
-      {/* CV Card */}
-      <div className="animate-cv-float" style={{ transformStyle: "preserve-3d" }}>
-        <div className="w-56 sm:w-64 bg-gradient-to-br from-[#1a1a2e] to-[#16162a] rounded-2xl p-5 border border-white/[0.08] shadow-2xl shadow-primary/10">
+    <div className="card-stack">
+      {cards.map((card, i) => (
+        <div key={i} className={`cv-card cv-card-${i + 1}`} style={{ background: card.bg }}>
           {/* Header */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-roast" />
-            <div className="flex-1">
-              <div className="h-2.5 w-20 bg-white/20 rounded-full" />
-              <div className="h-2 w-14 bg-white/10 rounded-full mt-1.5" />
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2.5">
+              <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${card.gradient} flex-shrink-0`} />
+              <span className="text-xs text-[#64748B] font-medium">{card.name}</span>
+            </div>
+            <div className="w-9 h-9 rounded-full bg-[#FF4500] flex items-center justify-center shadow-sm">
+              <span className="text-white text-[13px] font-extrabold">{card.score}</span>
             </div>
           </div>
-          {/* Content lines */}
-          <div className="space-y-2.5 mb-4">
-            <div className="h-2 w-full bg-white/10 rounded-full" />
-            <div className="h-2 w-4/5 bg-white/10 rounded-full" />
-            <div className="h-2 w-full bg-white/10 rounded-full" />
-            <div className="h-2 w-3/5 bg-white/10 rounded-full" />
+          {/* Skeleton lines */}
+          <div className="space-y-1.5 mb-3">
+            <div className="h-2 w-full bg-[#E8EBF0] rounded" />
+            <div className="h-2 w-[85%] bg-[#E8EBF0] rounded" />
+            <div className="h-2 w-[60%] bg-[#E8EBF0] rounded" />
           </div>
-          {/* Roast overlay */}
-          <div className="bg-roast/10 border border-roast/20 rounded-lg p-2.5 mb-3">
-            <p className="text-[9px] text-roast/80 leading-relaxed font-medium">
-              "Detail-oriented" — yet you misspelled "experience" twice...
-            </p>
+          {/* Roast pill */}
+          <div className="rounded-lg p-2 mb-2" style={{ background: "#FFF1F0", border: "1px solid #FFD5D0" }}>
+            <p className="text-[11px] text-[#DC2626] leading-relaxed">{card.roast}</p>
           </div>
-          {/* Tips overlay */}
-          <div className="bg-tips/10 border border-tips/20 rounded-lg p-2.5">
-            <p className="text-[9px] text-tips/80 leading-relaxed font-medium">
-              ✓ Quantify achievements with real metrics
-            </p>
-          </div>
-          {/* Score badge */}
-          <div className="absolute -top-3 -right-3 w-12 h-12 rounded-full bg-gradient-to-br from-roast to-orange-500 flex items-center justify-center shadow-lg shadow-roast/30">
-            <span className="text-white text-xs font-bold">3/10</span>
+          {/* Tip pill */}
+          <div className="rounded-lg p-2" style={{ background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
+            <p className="text-[11px] text-[#16A34A] leading-relaxed">{card.tip}</p>
           </div>
         </div>
-      </div>
+      ))}
     </div>
   );
 }
 
+/* ── Hero ── */
 export default function Hero({ onFileSelect }) {
   const [isDragging, setIsDragging] = React.useState(false);
   const fileInputRef = React.useRef(null);
 
-  function handleDragOver(e) {
-    e.preventDefault();
-    setIsDragging(true);
-  }
-
-  function handleDragLeave(e) {
-    e.preventDefault();
-    setIsDragging(false);
-  }
-
-  function handleDrop(e) {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) onFileSelect(file);
-  }
-
-  function handleFileChange(e) {
-    const file = e.target.files[0];
-    if (file) onFileSelect(file);
-  }
-
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-hero-dark">
-      {/* Animated gradient mesh background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div
-          className="absolute w-[500px] h-[500px] rounded-full blur-[120px]"
-          style={{
-            background: "radial-gradient(circle, rgba(124,111,205,0.4) 0%, transparent 70%)",
-            top: "10%",
-            left: "15%",
-            animation: "gradient-mesh-1 12s ease-in-out infinite",
-          }}
-        />
-        <div
-          className="absolute w-[400px] h-[400px] rounded-full blur-[100px]"
-          style={{
-            background: "radial-gradient(circle, rgba(226,75,74,0.3) 0%, transparent 70%)",
-            top: "40%",
-            right: "10%",
-            animation: "gradient-mesh-2 15s ease-in-out infinite",
-          }}
-        />
-        <div
-          className="absolute w-[350px] h-[350px] rounded-full blur-[100px]"
-          style={{
-            background: "radial-gradient(circle, rgba(255,107,53,0.25) 0%, transparent 70%)",
-            bottom: "10%",
-            left: "40%",
-            animation: "gradient-mesh-3 10s ease-in-out infinite",
-          }}
-        />
-      </div>
+    <section className="relative flex items-center overflow-hidden" style={{ background: "linear-gradient(135deg, #F8F9FF 0%, #EEF2FF 50%, #F5F0FF 100%)", minHeight: "85vh", padding: "80px 0" }}>
+      {/* Blobs */}
+      <div className="absolute top-[10%] right-[10%] w-[500px] h-[500px] rounded-full blur-[80px] animate-blob" style={{ background: "rgba(108,58,237,0.08)" }} />
+      <div className="absolute bottom-[10%] left-[5%] w-[400px] h-[400px] rounded-full blur-[80px] animate-blob [animation-delay:3s]" style={{ background: "rgba(255,69,0,0.06)" }} />
 
       {/* Floating emojis */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {FLOATING_EMOJIS.map((emoji, i) => (
-          <FloatingEmoji
-            key={i}
-            emoji={emoji}
-            delay={i * 1.5}
-            left={10 + i * 11}
-          />
-        ))}
+        {FLOATING_EMOJIS.map((e, i) => <FloatingEmoji key={i} emoji={e} delay={i * 1.5} left={10 + i * 11} />)}
       </div>
 
-      {/* Subtle grid overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-        }}
-      />
-
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto w-full grid lg:grid-cols-2 gap-12 lg:gap-16 items-center px-4 sm:px-6 lg:px-8 py-28">
-        {/* Left content */}
-        <div className="animate-fade-in">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.06] border border-white/[0.08] text-white/60 text-xs font-medium mb-8">
+      <div className="relative z-10 max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center px-4 sm:px-6 lg:px-8 gap-12 lg:gap-16">
+        {/* Left — content */}
+        <div className="flex-1 flex flex-col justify-center animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-card border border-primary/20 text-primary text-xs font-medium mb-8 shadow-sm self-start">
             <span className="w-1.5 h-1.5 rounded-full bg-tips animate-pulse" />
             AI-Powered CV Roaster
           </div>
 
           <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-[1.05] tracking-tight">
-            <span className="animate-ember">Roast</span>
-            <br />
-            <span className="text-white">My CV</span>
+            <span className="animate-ember">Roast</span><br />
+            <span className="text-text">My CV</span>
           </h1>
 
-          <p className="mt-6 text-lg sm:text-xl text-white/50 max-w-lg leading-relaxed">
-            Upload your CV and let AI brutally roast it — then actually fix it.
-            No mercy. No filter. Just truth.
+          <p className="mt-6 text-lg sm:text-xl text-text-body max-w-lg leading-relaxed">
+            Upload your CV and let AI brutally roast it — then actually fix it. No mercy. No filter. Just truth.
           </p>
 
           {/* Upload dropzone */}
           <div
-            className={`mt-10 relative rounded-2xl border-2 border-dashed transition-all duration-500 cursor-pointer p-6 sm:p-8 text-center backdrop-blur-sm ${
-              isDragging
-                ? "border-roast bg-roast/10 scale-[1.02]"
-                : "border-white/[0.12] bg-white/[0.03] hover:bg-white/[0.06] animate-glow-border"
+            className={`mt-10 relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer p-6 sm:p-8 text-center ${
+              isDragging ? "border-primary bg-primary/5 scale-[1.02]" : "border-border bg-card hover:border-primary hover:bg-card-hover"
             }`}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
+            style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={(e) => { e.preventDefault(); setIsDragging(false); }}
+            onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) onFileSelect(f); }}
             onClick={() => fileInputRef.current?.click()}
-            role="button"
-            tabIndex={0}
-            aria-label="Upload your CV file"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click();
-            }}
+            role="button" tabIndex={0} aria-label="Upload your CV"
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click(); }}
           >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.docx,.doc"
-              className="hidden"
-              onChange={handleFileChange}
-            />
+            <input ref={fileInputRef} type="file" accept=".pdf,.docx,.doc" className="hidden" onChange={(e) => { const f = e.target.files[0]; if (f) onFileSelect(f); }} />
             <div className="flex flex-col items-center gap-3">
-              <div className="w-14 h-14 rounded-xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center">
-                <svg className="w-7 h-7 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
+                <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                 </svg>
               </div>
-              <p className="font-medium text-white/80">
-                {isDragging ? "Drop it like it's hot! 🔥" : "Drag & drop your CV here"}
-              </p>
-              <p className="text-sm text-white/30">PDF & DOCX supported</p>
+              <p className="font-medium text-text">{isDragging ? "Drop it like it's hot! 🔥" : "Drag & drop your CV here"}</p>
+              <p className="text-sm text-text-muted">PDF & DOCX supported</p>
             </div>
           </div>
 
-          {/* CTA Button */}
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="mt-6 group relative px-8 py-4 rounded-xl text-white font-bold text-lg overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(124,111,205,0.4)] active:scale-95"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-roast to-orange-500 opacity-90 group-hover:opacity-100 transition-opacity" />
-            <span className="relative z-10 flex items-center gap-2">
-              🔥 Upload & Get Roasted
-            </span>
-          </button>
+          <div className="mt-6">
+            <LiquidMetalButton label="🔥 Upload & Get Roasted" onClick={() => fileInputRef.current?.click()} />
+          </div>
 
-          {/* Social proof */}
           <div className="mt-8 animate-slide-up [animation-delay:0.5s]">
             <SocialProofCounter />
           </div>
         </div>
 
-        {/* Right side — 3D CV Mockup */}
-        <div className="hidden lg:flex justify-center animate-slide-up [animation-delay:0.3s]">
-          <CVMockup />
+        {/* Right — Card Stack */}
+        <div className="hidden lg:flex flex-1 items-center justify-center" style={{ paddingLeft: "40px" }}>
+          <CardStack />
         </div>
       </div>
-
-      {/* Bottom fade to page bg */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-bg to-transparent" />
     </section>
   );
 }

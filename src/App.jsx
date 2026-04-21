@@ -1,4 +1,5 @@
 import React from "react";
+import { LiquidMetalButton } from "./components/ui/liquid-metal-button.jsx";
 import Hero from "./components/Hero.jsx";
 import StatsBar from "./components/StatsBar.jsx";
 import HowItWorks from "./components/HowItWorks.jsx";
@@ -11,155 +12,115 @@ import { extractText } from "./utils/extractText.js";
 import { generateRoast, generateTips } from "./utils/geminiApi.js";
 import { initUser, getCredits, useCredit, hasCredits } from "./utils/creditSystem.js";
 
+function ScrollProgressBar() {
+  const [progress, setProgress] = React.useState(0);
+  React.useEffect(() => {
+    function onScroll() {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(h > 0 ? (window.scrollY / h) * 100 : 0);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 h-[2px] pointer-events-none">
+      <div className="h-full transition-[width] duration-100" style={{ width: `${progress}%`, background: "linear-gradient(90deg, #FF4500, #6C3AED)" }} />
+    </div>
+  );
+}
+
 export default function App() {
   const [credits, setCredits] = React.useState(0);
   const [isLoading, setIsLoading] = React.useState(false);
   const [roast, setRoast] = React.useState(null);
   const [tips, setTips] = React.useState(null);
+  const [cvText, setCvText] = React.useState("");
   const [error, setError] = React.useState(null);
   const [showCreditModal, setShowCreditModal] = React.useState(false);
-
   const [scrolled, setScrolled] = React.useState(false);
 
   React.useEffect(() => {
     initUser();
     setCredits(getCredits());
-
-    function handleScroll() {
-      setScrolled(window.scrollY > 100);
-    }
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    function onScroll() { setScrolled(window.scrollY > 60); }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   async function handleFileSelect(file) {
-    // Check credits
-    if (!hasCredits()) {
-      setShowCreditModal(true);
-      return;
-    }
-
-    // Validate file size (10MB max)
-    if (file.size > 10 * 1024 * 1024) {
-      setError("File too large. Please upload a file under 10MB.");
-      return;
-    }
-
-    // Validate file type
-    const name = file.name.toLowerCase();
-    if (!name.endsWith(".pdf") && !name.endsWith(".docx") && !name.endsWith(".doc")) {
-      setError("Unsupported file type. Please upload a PDF or DOCX file.");
-      return;
-    }
-
-    setError(null);
-    setIsLoading(true);
-    setRoast(null);
-    setTips(null);
-
-    // Scroll to upload section
+    if (!hasCredits()) { setShowCreditModal(true); return; }
+    if (file.size > 10 * 1024 * 1024) { setError("File too large. Max 10MB."); return; }
+    const n = file.name.toLowerCase();
+    if (!n.endsWith(".pdf") && !n.endsWith(".docx") && !n.endsWith(".doc")) { setError("Unsupported file type."); return; }
+    setError(null); setIsLoading(true); setRoast(null); setTips(null); setCvText("");
     document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" });
-
     try {
-      // Extract text
-      const cvText = await extractText(file);
-
-      if (!cvText || cvText.trim().length < 50) {
-        throw new Error("Could not extract enough text from your CV. Try a different file.");
-      }
-
-      // Generate roast and tips in parallel
-      const [roastResult, tipsResult] = await Promise.all([
-        generateRoast(cvText),
-        generateTips(cvText),
-      ]);
-
-      setRoast(roastResult);
-      setTips(tipsResult);
-
-      // Use a credit
-      useCredit();
-      setCredits(getCredits());
+      const text = await extractText(file);
+      if (!text || text.trim().length < 50) throw new Error("Could not extract enough text.");
+      setCvText(text);
+      const [r, t] = await Promise.all([generateRoast(text), generateTips(text)]);
+      setRoast(r); setTips(t);
+      useCredit(); setCredits(getCredits());
     } catch (err) {
-      console.error("Processing failed:", err);
-      setError(err.message || "Something went wrong. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+      setError(err.message || "Something went wrong.");
+    } finally { setIsLoading(false); }
   }
 
-  function handleReset() {
-    setRoast(null);
-    setTips(null);
-    setError(null);
-    document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" });
-  }
-
-  function handleCreditAdded() {
-    setCredits(getCredits());
-  }
+  function handleReset() { setRoast(null); setTips(null); setCvText(""); setError(null); document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" }); }
 
   const hasResults = roast && tips;
 
   return (
     <div className="min-h-screen bg-bg">
-      {/* Header bar */}
-      <header className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        scrolled
-          ? "bg-bg/80 backdrop-blur-md border-b border-primary/10"
-          : "bg-transparent"
-      }`}>
+      <ScrollProgressBar />
+
+      {/* Navbar */}
+      <header
+        className={`fixed top-[2px] left-0 right-0 z-40 transition-all duration-300 ${scrolled ? "border-b" : ""}`}
+        style={{
+          background: scrolled ? "rgba(255,255,255,0.85)" : "transparent",
+          backdropFilter: scrolled ? "blur(16px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(16px)" : "none",
+          borderColor: scrolled ? "rgba(0,0,0,0.06)" : "transparent",
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <a href="/" className="text-lg font-bold">
-            <span className="animate-ember">
-              🔥 Roast
-            </span>{" "}
-            <span className={scrolled ? "text-text" : "text-white"}>My CV</span>
+          <a href="/" className="text-lg font-bold font-display">
+            <span className="text-accent">🔥 Roast</span>{" "}
+            <span className="text-text">My CV</span>
           </a>
           <div className="flex items-center gap-4">
-            <span className={`text-sm font-medium ${scrolled ? "text-text-secondary" : "text-white/50"}`}>
-              <span className={`font-bold ${scrolled ? "text-primary" : "text-white"}`}>{credits}</span> roast{credits !== 1 ? "s" : ""} left
+            <span className="text-sm font-medium text-text-body">
+              <span className="font-bold text-text">{credits}</span> roast{credits !== 1 ? "s" : ""} left
             </span>
-            <a
-              href="#upload"
-              className="hidden sm:inline-flex px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-light transition-colors"
-            >
-              Get Roasted
-            </a>
+            <div className="hidden sm:block">
+              <LiquidMetalButton label="Get Roasted" onClick={() => document.getElementById("upload")?.scrollIntoView({ behavior: "smooth" })} />
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main content */}
       <main>
-        <Hero onFileSelect={handleFileSelect} />
-        <StatsBar />
-        <HowItWorks />
-        <FeaturesBento />
-
-        {/* Error message */}
-        {error && (
-          <div className="max-w-2xl mx-auto px-4 mb-8">
-            <div className="bg-roast/10 border border-roast/20 text-roast rounded-xl p-4 text-center text-sm">
-              {error}
-            </div>
-          </div>
-        )}
-
         {hasResults ? (
-          <ResultTabs roast={roast} tips={tips} onReset={handleReset} />
+          <ResultTabs roast={roast} tips={tips} cvText={cvText} onReset={handleReset} />
         ) : (
-          <UploadSection onFileSelect={handleFileSelect} isLoading={isLoading} />
+          <>
+            <Hero onFileSelect={handleFileSelect} />
+            <StatsBar />
+            <HowItWorks />
+            <FeaturesBento />
+            {error && (
+              <div className="max-w-2xl mx-auto px-4 mb-8">
+                <div className="bg-red-50 border border-red-200 text-roast rounded-xl p-4 text-center text-sm">{error}</div>
+              </div>
+            )}
+            <UploadSection onFileSelect={handleFileSelect} isLoading={isLoading} />
+          </>
         )}
       </main>
 
       <Footer />
-
-      <CreditModal
-        isOpen={showCreditModal}
-        onClose={() => setShowCreditModal(false)}
-        onCreditAdded={handleCreditAdded}
-      />
+      <CreditModal isOpen={showCreditModal} onClose={() => setShowCreditModal(false)} onCreditAdded={() => setCredits(getCredits())} />
     </div>
   );
 }
